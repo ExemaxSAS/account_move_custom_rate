@@ -6,6 +6,16 @@ _logger = logging.getLogger(__name__)
 class AccountMove(models.Model):
     _inherit = "account.move"
 
+    def write(self, values):
+        res = super(AccountMove, self).write(values)
+        self.manual_rate()
+        return res
+
+    def create(self, values):
+        res = super(ResPartner, self).create(values)
+        self.manual_rate()
+        return res
+
     @api.depends('currency_id')
     def _get_currency_rate(self):
         for record in self:
@@ -17,6 +27,14 @@ class AccountMove(models.Model):
                     else:
                         rate = 1
                     record.currency_rate = rate
+
+    def manual_rate(self):
+        for line in self.line_ids:
+            if self.es_manual_rate == True:
+                if line.debit != 0:
+                    line.debit = line.amount_currency * self.currency_rate
+                if line.credit != 0:
+                    line.credit = line.amount_currency * self.currency_rate
 
     def _check_balanced(self):
             for rec in self:
