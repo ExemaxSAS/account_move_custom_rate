@@ -12,7 +12,7 @@ class AccountMove(models.Model):
         return res
 
     def create(self, values):
-        res = super(ResPartner, self).create(values)
+        res = super(AccountMove, self).create(values)
         self.manual_rate()
         return res
 
